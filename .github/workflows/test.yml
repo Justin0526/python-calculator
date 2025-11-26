@@ -27,7 +27,7 @@ jobs:
               run: pip install build
 
             - name: Build distribution packages
-              run: pip -m build
+              run: python -m build
 
             #Upload the built package as an artifact
             - name: Upload build artifacts
