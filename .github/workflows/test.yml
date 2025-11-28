@@ -5,7 +5,26 @@ on:
     branches: [ main ]
 
 jobs:
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install flake 8
+        run: pip install flake8
+
+      - name: Run linter
+        run: flake8 calculator.py test_calculator.py --max-line-length=100
+
   test:
+    needs: lint
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -38,12 +57,83 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Debug informationi
+        if: runner.debug == '1'
+        run: |
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Python version: ${{ matrix.python-version}}"
+          env
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}--pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run pytest
-        run: pytest -v
+        run: pytest -vv -s
 
+  deploy: 
+    name: Deploy to production
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    if: |
+      github.ref == 'refs/heads/main' && 
+      github.event_name == 'push' &&
+      success()
+
+    steps:
+      - name: Simulate deployment
+        run: |
+          echo "Deplying to production..."
+          echo "Environment: Production"
+          echo "Version: ${{ github.sha }}"
+
+  test-scenatios:
+    name: Test ${{ matrix.scenario }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        scenario:
+          - name: 'basic-operations'
+            marker: 'not slow'
+          - name: 'edge-cases'
+            marker: 'edge'
+          - name: 'performance'
+            marker: 'slow'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}--pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pipi install pytest-benchmark
+
+      - name: Run ${{ matrix.scenario.name }} tests
+        run: pytest -vv -s -m "${{ matrix.scenario.marker }}"
+    
+
+  
       
