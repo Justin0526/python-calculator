@@ -43,4 +43,3 @@ def test_power():
     assert power(2, 2) == 4
     assert power(20, 0) == 1
     assert power(10, -1) == 0.1
-
