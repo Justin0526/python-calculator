@@ -129,7 +129,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pipi install pytest-benchmark
+          pip install pytest-benchmark
 
       - name: Run ${{ matrix.scenario.name }} tests
         run: pytest -vv -s -m "${{ matrix.scenario.marker }}"
