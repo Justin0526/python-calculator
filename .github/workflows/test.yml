@@ -96,7 +96,7 @@ jobs:
           echo "Environment: Production"
           echo "Version: ${{ github.sha }}"
 
-  test-scenatios:
+  test-scenarios:
     name: Test ${{ matrix.scenario }}
     runs-on: ubuntu-latest
 
