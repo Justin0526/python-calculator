@@ -32,6 +32,7 @@ def test_divide():
     assert divide(-10, 2) == -5
 
 
+@pytest.mark.edge
 def test_divide_by_zero():
     """Test that dividing by zero rasies an error."""
     with pytest.raises(ValueError):
@@ -43,3 +44,11 @@ def test_power():
     assert power(2, 2) == 4
     assert power(20, 0) == 1
     assert power(10, -1) == 0.1
+
+
+@pytest.mark.slow
+def test_divide_performance():
+    """Performance test - pretend this is slow."""
+    for i in range(1000000):
+        divide(100, 5)
+    assert divide(100, 5) == 20
